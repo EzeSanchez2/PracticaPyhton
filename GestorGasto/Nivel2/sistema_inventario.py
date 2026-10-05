@@ -59,14 +59,39 @@ def vender_producto(lista_productos):
     if id_vender in lista_productos:
         cantidad_vender=int(input("Cuantas cantidades queres vender: "))
         if lista_productos[id_vender]["stock"] >= cantidad_vender:
-            stockVendido=lista_productos[id_vender]["stock"] - cantidad_vender
-            print(f"Listo se a vendido {stockVendido}")
-
+            stockRestante=lista_productos[id_vender]["stock"] - cantidad_vender
+            lista_productos[id_vender]["stock"]= stockRestante
+            print(f"VENTA REALIZADA: {stockRestante}")
         else:
             print("No hay esa cantidad de stock el disponible")
     else:
         print("No se encuentra el ID que quiere vender")
-    
+
+def reponer_stock(lista_productos):
+    id_reponer=int(input("Ingrese el ID para reponer el stock: "))
+    if id_reponer in lista_productos:
+        cantidad_reponer=int(input("Ingrese la cantidad de stock que quiere reponer: "))
+        if cantidad_reponer > 0: 
+            stock_actualizado=lista_productos[id_reponer]["stock"] + cantidad_reponer
+            lista_productos[id_reponer]["stock"] = stock_actualizado
+            print(f"Stock Repuesto: {stock_actualizado}")
+        else:
+            print("No se puede reponer menos de 0 unidades")
+    else:
+        print("No existe el ID del producto que usted quiere reponer")
+
+def mostrar_stock_bajo(lista_productos):
+    for clave , valor in lista_productos.items():
+        if lista_productos[clave]["stock"] <= 5:
+            print(f"{clave}|{valor}")
+        
+def total_valor(lista_productos):
+    acumulador=0
+    for clave, valor in lista_productos.items():
+        total_stock_precio=lista_productos[clave]["stock"] * lista_productos[clave]["precio"]
+        acumulador += total_stock_precio
+    print(f"El total valor del inventario es de:{acumulador}")
+
 opc=0
 while opc != 10:
     opc=menu()
@@ -81,13 +106,13 @@ while opc != 10:
     elif opc == 5:
         eliminar_producto(lista_productos)
     elif opc == 6:
-        print("Se esta vendiendo el producto")
+        vender_producto(lista_productos)
     elif opc == 7:
-        print("Se esta reponiendo el stock")
+        reponer_stock(lista_productos)
     elif opc == 8:
-        print("Se esta mostrando  productos con stock bajo")
+        mostrar_stock_bajo(lista_productos)
     elif opc == 9:
-        print("Se esta mostando el valor del inventario")
+        total_valor(lista_productos)
     elif opc == 10:
         print("Saliste del sistema")
     else:
