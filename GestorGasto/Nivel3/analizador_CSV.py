@@ -60,17 +60,29 @@ def productos_mas_vendidos(lista_ventas):
         if valor > p_mas_vendidos:
             p_mas_vendidos=valor
             nombre_p_vendido=clave
+    return nombre_p_vendido
+
+def ventas_mayor_importe(lista_ventas):
+    mayor_importe=0
+    nombre_venta=""
+    for ventas in lista_ventas:
+        importe= ventas["Cantidad"] * ventas["Precio"]
+        if importe > mayor_importe:
+            mayor_importe=importe
+            nombre_venta=ventas["Producto"]
+    print(f"La venta con mayor importe es:{nombre_venta} | Con un importe de: {mayor_importe}")
+
+def ventas_por_fechas(lista_ventas):
+    fecha_buscar=input("Ingrese la fecha de la venta que quiere buscar: ")
+    encontrado=False
+    for ventas in lista_ventas:
+        if ventas["Fecha"] == fecha_buscar:
+            print(ventas["Producto"])
+            encontrado=True
+    if encontrado == False:
+        print("No se encontro la venta asociado a esa fecha")
                 
             
-
-
-
-        
-
-
-
-        
-
 
 
 
@@ -84,11 +96,11 @@ while opc != 7:
     elif opc == 3:
         total_vendido(lista_ventas)
     elif opc == 4:
-        print("Se esta mostrando los productos mas vendidos")
+        productos_mas_vendidos(lista_ventas)
     elif opc == 5:
-        print("Se esta mostrando venta de mayor importe")
+        ventas_mayor_importe(lista_ventas)
     elif opc == 6:
-        print("Se esta mostrando ventas por fecha")
+        ventas_por_fechas(lista_ventas)
     elif opc == 7:
         print("Saliste del programa")
     else:
