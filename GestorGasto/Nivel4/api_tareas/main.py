@@ -50,7 +50,7 @@ def modificar_libro(id:int,libro:libros ):
             "editorial": libro.editorial
         }
         diccionario_libro[id]= datos_libros
-        return {"mensaje": f"Se modifico el libro ID: {id}" , f"libro": {datos_libros}}
+        return {"mensaje": f"Se modifico el libro ID: {id}" , "libro": datos_libros}
     else:
         return {"error": f"El libro con ID {id} no existe y no se puede modificar"}
         
@@ -60,9 +60,10 @@ def modificar_libro(id:int,libro:libros ):
 @app.delete("/libros/{id}")
 def eliminar_libro(id:int):
     if id in diccionario_libro:
-        busqueda_id= diccionario_libro[id]
-        del busqueda_id
+        del diccionario_libro[id]
         return {"Libro_eliminado":f"El libro se a eliminado"}
+    else:
+        return {"Error": "No se encontro el ID"}
 
 
 
