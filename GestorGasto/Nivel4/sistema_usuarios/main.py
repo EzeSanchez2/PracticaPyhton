@@ -11,7 +11,7 @@ from typing import Annotated
 
 app_nueva= FastAPI()
 
-JWT_SECRET= secrets.token_hex(16) # Firma del token , con esto si se cambia el email se sabe que no coincide y tira error
+JWT_SECRET= "67c5efdcfee96ba4bb34a008c5776501182dead5f80ac5767085fc3d823c7156" # Firma del token , con esto si se cambia el email se sabe que no coincide y tira error
 JWT_ALGORITHM= "HS256"
 oauth2_scheme= OAuth2PasswordBearer(tokenUrl="/login") #Es el que mira el Header.Si la peticion no tiene el header lanza un error.
 
@@ -23,6 +23,10 @@ class user(BaseModel):
 class login_user(BaseModel):
     email:EmailStr
     password:str
+
+class Task(BaseModel):
+    title: str
+    description: str
 
 def sign(email):
     now_utc= datetime.now(timezone.utc)
@@ -91,9 +95,8 @@ def login(user:login_user):
         "access_token":token,
         "token_type": "bearer"
     }
-    
-@app_nueva.get("/me")                                               #El Depends dice "Antes de ejecutar la funcion ejecuta el oauth2_scheme"
-def analizar_token(token: Annotated[str, Depends(oauth2_scheme)]):  #El Annoted dice el tipo de parametro que espero y despues de donde sacarlo que seria el Depends
+
+def  get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
     found=None
     try:
         payload=jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM]) #En algorithms va una lista
@@ -119,10 +122,46 @@ def analizar_token(token: Annotated[str, Depends(oauth2_scheme)]):  #El Annoted 
         detail= "Invalid credential"
     )
 
-    return {
-        "user_name": found["user_name"],
-        "email": found["email"]
+    return found 
+
+    
+@app_nueva.get("/me")                                                     #El Depends dice "Antes de ejecutar la funcion ejecuta el oauth2_scheme"
+def analizar_token(usuario: Annotated[dict, Depends(get_current_user)]):  #El Annoted dice el tipo de parametro que espero y despues de donde sacarlo que seria el Depends
+   return {
+       "user_name": usuario["user_name"],
+       "email": usuario["email"]
+   }
+
+
+dictionary_task={}
+counter_tasks=0
+@app_nueva.post("/task")
+def task_client(user: Annotated[dict, Depends(get_current_user)] , task:Task):
+    global counter_tasks
+    counter_tasks += 1
+
+    task_data= {
+        "title": task.title,
+        "description": task.description,
+        "email_owner": user["email"]
     }
+
+    dictionary_task[counter_tasks]= task_data
+
+    return {"Messagge":"The task has been created successfully"}
+
+
+@app_nueva.get("/task")
+def get_task(user:Annotated[dict , Depends(get_current_user)]):
+    tasks=[]
+    for u in dictionary_task.values():
+        if u["email_owner"] == user["email"]:
+            tasks.append(u)
+    return tasks
+            
+
+    
+    
         
 
 
@@ -137,4 +176,3 @@ def analizar_token(token: Annotated[str, Depends(oauth2_scheme)]):  #El Annoted 
 
 
 
-    
