@@ -1,5 +1,5 @@
 from fastapi import FastAPI,HTTPException,Depends
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from pydantic import BaseModel, EmailStr
 import bcrypt
 import jwt
@@ -67,10 +67,10 @@ def register_user(data_user:user):
 
 
 @app_nueva.post("/login")
-def login(user:login_user):
+def login(user_data:Annotated[OAuth2PasswordRequestForm, Depends()]):
     found=None  #No esta encontrado el usuario
     for u in users.values(): # Buscamos al usuario en el diccionario
-        if u["email"] == user.email:  # Si el email que se busca coincide con uno que esta
+        if u["email"] == user_data.username:  # Si el email que se busca coincide con uno que esta
             found= u  # encontrado es el usuario
             break
     if found is None: # Si no se lo encuentra
@@ -79,7 +79,7 @@ def login(user:login_user):
             detail= "Invalid credentials" #Error credenciales invalidas
         )
     
-    password_bytes=user.password.encode("utf-8") #Pongo a byte la contraseña
+    password_bytes=user_data.password.encode("utf-8") #Pongo a byte la contraseña
     stored_hash_bytes= found["password_hash"].encode("utf-8") # Pongo a byte la contraseña hasheada del usuario
     is_valid=bcrypt.checkpw(password=password_bytes, hashed_password=stored_hash_bytes) # Aca se compara los dos hash, la contraseña escrita y la contraseña guardada
 
@@ -89,7 +89,7 @@ def login(user:login_user):
             status_code=401,
             detail="Invalid credentials" # Error credencial invalida
         )
-    token=sign(user.email)
+    token=sign(user_data.username)
 
     return {
         "access_token":token,
